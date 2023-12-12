@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+    <head>
+        <title>Rating Widget Redux</title>
+
+        <style>
+            
+        </style>
+    </head>
+
+<body>
+
+    <h1>Rating widget</h1>
+    <h3>How satisified are you?</h3>
+
+
+    <script>
+
+        class RatingWidget extends HTMLElement{
+            constructor() {
+                super() ;
+    
+                const shadow = this.attachShadow({mode:'open'}) ;
+    
+                const template = document.createElement('template') ;
+               template.innerHTML = `
+               <style>
+   
+                #stars{
+                display: flex ;
+                color:grey ;
+
+
+               
+                
+            }
+        
+          div{
+            cursor:pointer ;
+          }
+
+            .lightUp {
+                color:gold;
+            }
+
+
+            
+    
+                </style>
+    
+                <div id="stars">
+                <div id="s1">&#x2605;</div>
+                <div id="s2">&#x2605;</div>
+                <div id="s3">&#x2605;</div>
+                <div id="s4">&#x2605;</div>
+                <div id="s5">&#x2605;</div>
+                </div>
+                ` ;
+    
+                shadow.appendChild(template.content.cloneNode(true)) ;
+    
+    
+
+                
+    
+            }
+
+        
+    
+            //ConnectedCallBack == When its been placed in the tree
+            
+            connectedCallback() {
+              
+                let ratings = this.shadowRoot.querySelectorAll('#stars div') ;
+               // alert(ratings[4].getAttribute("id")) ;
+                ratings[0].addEventListener("click",() => this.getRating(1)) ;
+                ratings[1].addEventListener("click",() => this.getRating(2)) ;
+                ratings[2].addEventListener("click",() => this.getRating(3)) ;
+                ratings[3].addEventListener("click",() => this.getRating(4)) ;
+                ratings[4].addEventListener("click",() => this.getRating(5)) ;
+
+                ratings[0].addEventListener("mouseover", () => this.lightUp(1)) ;
+                ratings[1].addEventListener("mouseover", () => this.lightUp(2)) ;
+                ratings[2].addEventListener("mouseover", () => this.lightUp(3)) ;
+                ratings[3].addEventListener("mouseover", () => this.lightUp(4)) ;
+                ratings[4].addEventListener("mouseover", () => this.lightUp(5)) ;
+
+
+                ratings[0].addEventListener("mouseout", () => this.darken(1)) ;
+                ratings[1].addEventListener("mouseout", () => this.darken(2)) ;
+                ratings[2].addEventListener("mouseout", () => this.darken(3)) ;
+                ratings[3].addEventListener("mouseout", () => this.darken(4)) ;
+                ratings[4].addEventListener("mouseout", () => this.darken(5)) ;
+
+            }
+
+            lightUp(star) {
+                let s = this.shadowRoot.querySelectorAll("#stars div") ;
+                //alert(star) ;
+                for (let i = 0 ; i < star ; i++) {
+                    s[i].classList.add("lightUp") ;
+                }
+
+
+            }
+
+            darken(star) {
+                let s = this.shadowRoot.querySelectorAll("#stars div") ;
+                //alert(star) ;
+                for (let i = 0 ; i < star ; i++) {
+                    s[i].classList.remove("lightUp") ;
+                }
+
+
+            }
+
+
+
+            getRating(rating){
+                let message ; 
+
+                if (rating >= 5) {
+                    message = "A 5!? Thank you! Glad to hear it!" ;
+                }
+                else if (rating == 4) {
+                    message = "Great, thank you!" ;
+                }
+                else if (rating == 3) {
+                    message = "Hmm a 3? We'll do better!"
+                }
+                else if (rating == 2) {
+                    message = "2? We'll work on it"
+                }
+                else {
+                    message = "Yikes a 1!? We're very sorry to hear that, we'll strive to do better."
+                }
+
+                this.shadowRoot.innerHTML = message ; 
+                this.submit(rating) ;
+            }
+
+          
+submit(rating) {
+    let xhr = new XMLHttpRequest();
+
+    // Define the callback function to handle the response
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                // The request was successful, handle the response here
+                let data = JSON.parse(xhr.responseText);
+                console.log(data);
+            } else {
+                // The request failed, handle errors here
+                console.error('Error:', xhr.status);
+            }
+        }
+    };
+
+    // Open the request with the appropriate method and URL
+    xhr.open("POST", "https://httpbin.org/post", true);
+
+    // Set the request headers
+    xhr.setRequestHeader("X-Sent-By", "JS");
+
+    // Create a FormData object
+    const formData = new FormData();
+
+    // Append the rating and sentBy fields to the form
+    formData.append("rating", rating);
+    formData.append("sentBy", "JS");
+
+    // Send the request with the form data
+    xhr.send(formData) ;
+}
+
+
+
+
+           
+            
+    
+            //DisconnectedCallBack == When its been removed from the tree
+    
+        } 
+        document.documentElement.classList.remove('no-js');
+    
+        customElements.define("rating-widget", RatingWidget) ;
+       
+    
+       
+    
+    
+    </script>
+
+
+
+
+
+
+<rating-widget>
+
+    
+ 
+        <h3>JavaScript disabled</h3>
+    <form action="https://httpbin.org/post" method="POST">
+        <label for="rating">How satisified are you?</label>
+        <input type="hidden" name="question" value="How satisified are you?">
+        <input type="hidden"  name="sentBy" value="HTML">
+        <input type="number" id="rating" name="rating" min="0" max="5" value="0" required>
+        <button type="submit">Submit</button>
+
+
+    </form>
+</rating-widget>
+<style>
+    h1 {
+color: rgb(1, 1, 1);
+    }
+</style>
+
+
+
+</body>
+</html>
