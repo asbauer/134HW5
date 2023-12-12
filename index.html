@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Weather</title>
+    </head>
+
+    <body>
+        <h1>Current Weather</h1>
+
+        <weather-widget>
+            Current Weather Conditions Unavailable
+
+            <output></output>
+
+
+
+
+        </weather-widget>
+        <a href="widgetRedux.html">Rating Widget</a>
+
+    </body>
+
+    <script>
+
+class Weather extends HTMLElement{
+            constructor() {
+                super() ;
+    
+                const shadow = this.attachShadow({mode:'open'}) ;
+    
+                const template = document.createElement('template') ;
+                this.shadowRoot.innerHTML = " " ;
+                let latitude = "32.8801"
+                let longitude = "117.2340"
+               // template.innerHTML = `<h1>template</h1>` ;
+
+               // shadow.appendChild(template.content.cloneNode(true)) ;
+
+
+
+                const output = document.querySelector('output') ;
+
+let xhr = new XMLHttpRequest();
+let failMessage  ; 
+
+
+//xhr.open("GET", "https://api.weather.gov/points/32.8801,117.2340", true);
+
+
+// xhr.open("GET", " https://api.weather.gov/points/39.7456,-97.0892" ) ;
+
+xhr.open("GET", " https://api.weather.gov/points/32.8801,-117.2340" ) ;
+//xhr.responseType = "text" ;
+xhr.send() ;
+
+let forecastURL ;
+let city ;
+let state ; 
+
+/*
+xhr.onload = function () {
+    if (xhr.status === 200) {
+    const data = JSON.parse(xhr.response) ;
+   // console.log(data['properties']['forecast']) ;
+   let forecastRequest = new XMLHttpRequest() ;
+
+    }
+    else if (xhr.status === 404) {
+        template.innerHTML = "Weather unavailable" ;
+        console.log("Error retrieving weather") ;
+    }
+}
+*/
+
+// Define the callback function to handle the response
+xhr.onreadystatechange = function () {
+if (xhr.readyState === XMLHttpRequest.DONE) {
+if (xhr.status === 200) {
+
+
+// The request was successful, handle the response here
+let data = JSON.parse(xhr.responseText);
+let city = data.properties.relativeLocation.properties.city ;
+let state = data.properties.relativeLocation.properties.state ;
+forecastURL = data.properties.forecast ;
+
+
+let forecastRequest = new XMLHttpRequest(); 
+
+forecastRequest.open("GET", forecastURL, true) ;
+forecastRequest.send() ;
+
+forecastRequest.onreadystatechange = function() {
+if (forecastRequest.readyState === XMLHttpRequest.DONE) {
+    if(forecastRequest.status === 200) {
+        let forecast = JSON.parse(forecastRequest.responseText) ;
+        let temp = forecast.properties.periods[0].temperature ;
+        let tempUnit = forecast.properties.periods[0].temperatureUnit  ;
+        temp = temp + " " + tempUnit ;  
+        let detailedForecast = forecast.properties.periods[0].detailedForecast ; 
+       let windDirection= "Wind Direction: " + forecast.properties.periods[0].windDirection ;
+       let icon = forecast.properties.periods[0].icon ;
+       
+       
+        template.innerHTML = `
+        <style>
+           
+            div {
+                display:flex ;
+            }
+            img {
+                display:inline ;
+
+            }
+           
+
+            </style>
+            <h2> ${city} ${state} </h2>
+            <div>
+       
+        <img src=${icon}>
+        <p> ${temp} ${detailedForecast} ${windDirection} </p>
+        </div>
+        ` ;
+        shadow.appendChild(template.content.cloneNode(true)) ;
+
+
+    }
+    else {
+    console.error("Error", forecastRequest.status) ;
+    failMessage = "Weather Unavailable" ;
+    template.innerHTML = failMessage ; 
+}
+}
+
+}
+
+
+
+
+} else {
+// The request failed, handle errors here
+console.error('Error:', xhr.status);
+failMessage = "Weather unavailable."
+template.innerHTML = failMessage ; 
+}
+}
+}
+
+shadow.appendChild(template.content.cloneNode(true)) ;
+
+
+
+/*
+let response ; 
+xhr.addEventListener('load',() => {
+if (xhr.status === 200) {
+ response = JSON.parse(xhr.responseText) ;
+output.textContent = response ; 
+
+}
+})
+
+
+alert(xhr.responseText) ;
+
+*/
+
+
+        }
+
+        getWeather() {
+            const output = document.querySelector('output') ;
+
+            let xhr = new XMLHttpRequest();
+
+
+            //xhr.open("GET", "https://api.weather.gov/points/32.8801,117.2340", true);
+
+
+          // xhr.open("GET", " https://api.weather.gov/points/39.7456,-97.0892" ) ;
+
+          xhr.open("GET", " https://api.weather.gov/points/32.8801,-117.2340" ) ;
+    xhr.send() ;
+
+// Define the callback function to handle the response
+xhr.onreadystatechange = function () {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+            // The request was successful, handle the response here
+            let data = JSON.parse(xhr.responseText);
+            console.log(data);
+          
+        } else {
+            // The request failed, handle errors here
+            console.error('Error:', xhr.status);
+        }
+    }
+
+    let response ; 
+    xhr.addEventListener('load',() => {
+        if (xhr.status === 200) {
+             response = JSON.parse(xhr.responseText) ;
+            output.textContent = response ; 
+           
+            
+        }
+    })
+
+
+
+    let latitude = "32.8801"
+    let longitude = "117.2340"
+
+
+
+
+   return response  ;
+
+
+
+
+
+            }
+
+        }
+
+    }
+
+
+
+
+        customElements.define("weather-widget",Weather) ;
+
+    </script>
+
+
+
+
+
+
+
+</html>
